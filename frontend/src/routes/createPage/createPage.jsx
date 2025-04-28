@@ -1,4 +1,4 @@
-import Image from "../../components/image/image"
+import IKImage from "../../components/image/image"
 import './createPage.css'
 import useAuthStore from '../../utils/authStore'
 import { useNavigate } from "react-router"
@@ -8,8 +8,13 @@ import Editor from "../../components/editor/editor"
 const CreatePage = () => {
   const navigate = useNavigate();
   const {currentUser} = useAuthStore();
-
+  
   const [file, setFile] = useState(null)
+  const [previewImg, setPreviewImg] = useState({
+    url: "",
+    width: 0,
+    height: 0,
+  })
   const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
@@ -19,7 +24,19 @@ const CreatePage = () => {
     }
   }, [navigate,currentUser])
 
-  const previewImgURL = file ? URL.createObjectURL(file) : null;
+  useEffect(() => {
+    if(file) {
+      const img = new Image();
+      img.src=URL.createObjectURL(file);
+      img.onload = () => {
+        setPreviewImg({
+          url: URL.createObjectURL(file),
+          width: img.width,
+          height: img.height,
+        })
+      }
+    }
+  }, [file])
     
   return (
     <div className='createPage'>
@@ -27,20 +44,20 @@ const CreatePage = () => {
         <h1>{isEditing ? "Design your Pin" : "Create Pin"}</h1>
         <button>{isEditing ? "Done" : "Publish"}</button>
       </div>
-      {isEditing ? <Editor /> : (
+      {isEditing ? <Editor previewImg={previewImg} /> : (
           <div className="createBottom">
-          {previewImgURL ? (
+          {previewImg.url ? (
             <div className="preview">
-              <img src={previewImgURL} alt="" />
+              <img src={previewImg.url} alt="" />
               <div className="editIcon" onClick={() => setIsEditing(true)}>
-                <Image path="/general/edit.svg" alt="edit" />
+                <IKImage path="/general/edit.svg" alt="edit" />
               </div>
             </div>
           ) : (
             <>
             <label htmlFor="file" className="upload">
               <div className="uploadTitle">
-                <Image path="/general/upload.svg" alt="" />
+                <IKImage path="/general/upload.svg" alt="" />
                 <span>Choose a file</span>
               </div>
               <div className="uploadInfo">
